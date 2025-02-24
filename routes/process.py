@@ -1,6 +1,7 @@
 import os
 import uuid
 import json
+import asyncio
 from fastapi import APIRouter, UploadFile, File, Form
 from models.process_input import ProcessInput
 from pathlib import Path
@@ -47,8 +48,12 @@ async def process_documents(
         uploaded_files.append(str(absolute_path))
     
     documents = exec_load_documents(uploaded_files)
-    candidate_data = exec_candidate_data(documents)
-    assessments = exec_assessment(documents, process_input_data.job_requirements)
+    
+    # Execute candidate data extraction and requirements assessment in parallel
+    candidate_data, assessments = await asyncio.gather(
+        exec_candidate_data(documents),
+        exec_assessment(documents, process_input_data.job_requirements)
+    )
 
     results = ProcessOutput(
         candidate_data=candidate_data,
