@@ -1,3 +1,11 @@
+"""
+Assessment Pipeline Module
+
+This module defines a Haystack pipeline for assessing job requirements against candidate documents.
+It uses OpenAI's LLM to analyze each requirement and determine if it's met by the candidate's
+experience, providing clarifying questions when needed.
+"""
+
 import os
 from dotenv import load_dotenv
 from haystack import Pipeline
@@ -10,6 +18,7 @@ from models import RequirementAssessment
 # Load environment variables
 load_dotenv()
 
+# System prompt defining the AI's role and purpose
 assessment_template = [
     ChatMessage.from_system(
         "You are a clever assistant that can infer if a candidate meets the a job requirement"
@@ -37,11 +46,30 @@ assessment_template = [
     ),
 ]
 
+# Initialize the assessment pipeline
 assessment_pipeline = Pipeline()
-assessment_pipeline.add_component(instance=ChatPromptBuilder(template=assessment_template), name="assessment_prompt")
-assessment_pipeline.add_component(instance=OpenAIChatGenerator(model=os.getenv("ASSESSMENT_MODEL", "gpt-4")), name="openai_generator")
-assessment_pipeline.add_component(instance=LLMToModel(model_class=RequirementAssessment), name="llm_to_model")
 
+# Add prompt building component
+assessment_pipeline.add_component(
+    instance=ChatPromptBuilder(template=assessment_template),
+    name="assessment_prompt"
+)
+
+# Add OpenAI chat component with configurable model
+assessment_pipeline.add_component(
+    instance=OpenAIChatGenerator(
+        model=os.getenv("ASSESSMENT_MODEL", "gpt-4")
+    ),
+    name="openai_generator"
+)
+
+# Add component to convert LLM output to RequirementAssessment model
+assessment_pipeline.add_component(
+    instance=LLMToModel(model_class=RequirementAssessment),
+    name="llm_to_model"
+)
+
+# Connect pipeline components
 assessment_pipeline.connect("assessment_prompt.prompt", "openai_generator.messages")
 assessment_pipeline.connect("openai_generator.replies", "llm_to_model.replies")
 

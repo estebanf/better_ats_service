@@ -1,3 +1,11 @@
+"""
+Candidate Data Pipeline Module
+
+This module defines a Haystack pipeline for extracting structured candidate information
+from resume documents. It uses OpenAI's LLM to parse and structure the information
+into a standardized CandidateData format.
+"""
+
 import os
 from dotenv import load_dotenv
 from haystack import Pipeline
@@ -10,6 +18,7 @@ from models import CandidateData
 # Load environment variables
 load_dotenv()
 
+# System prompt defining the AI's role and purpose
 candidate_data_template = [
     ChatMessage.from_system(
         "You are a helpful assistant that extracts data from documents received in a job application"
@@ -17,7 +26,7 @@ candidate_data_template = [
     ChatMessage.from_user(
         """Your goal is to extract from the documents the information required about the candidate. You should keep the data extracted as written in the documents, so don't summarize it or change it.
 
-    {{format_instructions}}
+        {{format_instructions}}
 
         The documents where you are going to extract the data from are the following:
 
@@ -32,10 +41,29 @@ candidate_data_template = [
     ),
 ]
 
+# Initialize the candidate data extraction pipeline
 candidate_data_pipeline = Pipeline()
-candidate_data_pipeline.add_component(instance=ChatPromptBuilder(template=candidate_data_template), name="candidate_prompt")
-candidate_data_pipeline.add_component(instance=OpenAIChatGenerator(model=os.getenv("CANDIDATE_DATA_MODEL", "gpt-4")), name="openai_generator")
-candidate_data_pipeline.add_component(instance=LLMToModel(model_class=CandidateData), name="llm_to_model")
 
+# Add prompt building component
+candidate_data_pipeline.add_component(
+    instance=ChatPromptBuilder(template=candidate_data_template),
+    name="candidate_prompt"
+)
+
+# Add OpenAI chat component with configurable model
+candidate_data_pipeline.add_component(
+    instance=OpenAIChatGenerator(
+        model=os.getenv("CANDIDATE_DATA_MODEL", "gpt-4")
+    ),
+    name="openai_generator"
+)
+
+# Add component to convert LLM output to CandidateData model
+candidate_data_pipeline.add_component(
+    instance=LLMToModel(model_class=CandidateData),
+    name="llm_to_model"
+)
+
+# Connect pipeline components
 candidate_data_pipeline.connect("candidate_prompt.prompt", "openai_generator.messages")
 candidate_data_pipeline.connect("openai_generator.replies", "llm_to_model.replies")
