@@ -26,6 +26,8 @@ candidate_data_template = [
     ChatMessage.from_user(
         """Your goal is to extract from the documents the information required about the candidate. You should keep the data extracted as written in the documents, so don't summarize it or change it.
 
+        You are expected to extract: First name, Last name, Email, Phone, LinkedIn profile, and all the experiences of the candidate. For each experience, you should extract: Company, Title, Start date, End date, and Description. Do not make up any information, only extract what is written in the documents. Do not attempt to extract any additional information.
+
         {{format_instructions}}
 
         The documents where you are going to extract the data from are the following:

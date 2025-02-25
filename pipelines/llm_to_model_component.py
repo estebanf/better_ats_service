@@ -8,12 +8,13 @@ into strongly-typed data structures.
 
 import json
 
-from haystack import Component
+from haystack import component
 from haystack.dataclasses import ChatMessage
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
-class LLMToModel(Component):
+@component
+class LLMToModel:
     """
     A Haystack component that converts LLM outputs to Pydantic models.
     
@@ -33,12 +34,11 @@ class LLMToModel(Component):
             model_class: The Pydantic model class to use for parsing LLM output.
                         Must be a subclass of BaseModel.
         """
-        super().__init__()
         self.model_class = model_class
-        Component.set_output_types(self, model=model_class)
 
-    @Component.output_types(model=BaseModel)
-    def run(self, replies: List[str], **kwargs) -> Dict[str, Any]:
+
+    @component.output_types(model=BaseModel)
+    def run(self, replies: List[ChatMessage], **kwargs) -> Dict[str, Any]:
         """
         Process LLM replies and convert to a Pydantic model.
 
@@ -52,7 +52,7 @@ class LLMToModel(Component):
                 under the 'model' key.
         """
         for reply in replies:
-            raw_content = reply
+            raw_content = reply.content
             if raw_content.startswith("```json") and raw_content.endswith("```"):
                 raw_content = raw_content[len("```json"): -len("```")].strip()
             parsed_model = self.model_class.model_validate_json(raw_content)
