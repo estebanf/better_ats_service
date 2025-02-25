@@ -162,7 +162,7 @@ The service uses several key components:
 
 - **Models**: Pydantic models for data validation and serialization
 - **Routes**: FastAPI route handlers for API endpoints
-- **Pipelines**: Haystack pipelines for document processing and LLM interactions
+- **Pipelines**: [#Haystack](https://github.com/deepset-ai/haystack) pipelines for document processing and LLM interactions
 - **Exec**: Execution modules for parallel processing and pipeline orchestration
 
 ### Adding New Features
