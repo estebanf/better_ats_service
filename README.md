@@ -2,6 +2,10 @@
 
 A FastAPI-based microservice that processes resumes against job requirements using AI. The service extracts candidate information from uploaded documents and assesses each job requirement against the candidate's experience.
 
+## Related blog post
+
+[Thought exercise: Improving Candidate Experience in ATS with AI-Powered Resume Parsing](https://www.estebanf.com/product-management/2025/02/25/thought-exercise-improving-candidate-experience-in-ats-with-ai-powered-resume-parsing/)
+
 ## Features
 
 - Extract structured candidate data from resumes (PDF format)
